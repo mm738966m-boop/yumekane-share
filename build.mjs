@@ -11,6 +11,7 @@ const ROOT = dirname(fileURLToPath(import.meta.url));
 const SITE = 'https://mm738966m-boop.github.io/yumekane-share/';
 const PAGES = [
   { src: 'src/nakamura_11.html', out: 'nakamura11/index.html', title: '11月の勉強会 企画書', ogTitle: '11月の勉強会 企画書', ogDesc: 'ユメカネサロン月曜勉強会、11月の4回の進め方とスライド用のAI指示文', og: 'og_nakamura11.png' },
+  { src: 'src/deck_1116.html', out: 'nakamura1116/index.html', title: 'みんなで企業分析｜ファーストリテイリング', ogTitle: '11/16 みんなで企業分析｜ファーストリテイリング', ogDesc: 'ユニクロの会社を、5つのチェックで見てみよう（ユメカネサロン月曜勉強会のスライド）', og: 'og_nakamura1116.png', pdf: 'src/deck_1116.pdf' },
 ];
 
 const b64 = u8 => Buffer.from(u8).toString('base64');
@@ -22,7 +23,9 @@ for (const p of PAGES) {
   const html = readFileSync(`${ROOT}/${p.src}`, 'utf8')
     .replace(/<title>.*?<\/title>/s, '')
     .replace(/<meta name="claude:[^>]*>/g, '')
-    .replace(/<link [^>]*fonts\.g[^>]*>/g, '');
+    .replace(/<link [^>]*fonts\.g[^>]*>/g, '')
+    .replaceAll('__KEY__', PW)
+    .replace('__PDF_B64__', () => p.pdf ? readFileSync(`${ROOT}/${p.pdf}`).toString('base64') : '');
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, KEY, new TextEncoder().encode(html)));
   const data = new Uint8Array(12 + ct.length); data.set(iv); data.set(ct, 12);
